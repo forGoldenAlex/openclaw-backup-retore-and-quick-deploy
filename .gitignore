@@ -1,0 +1,23 @@
+# 用户数据 — 不提交
+config/
+credentials/
+memory/
+workspace/
+skills/
+
+# 生成的依赖文件
+deps/pip-requirements.txt
+deps/npm-requirements.txt
+
+# 容器镜像
+containers/searxng/searxng.tar
+containers/searxng/settings.yml
+
+# 备份打包文件
+*.tar.gz
+*.sha256
+
+# 备份文件
+*.bk.*
+*.bak
+*.backup
