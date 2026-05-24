@@ -16,7 +16,7 @@ import copy
 
 OPENCLAW_HOME = os.path.expanduser("~/.openclaw")
 SOURCE = os.path.join(OPENCLAW_HOME, "openclaw.json")
-BACKUP = os.path.join(OPENCLAW_HOME, "workspace", "openclaw-backup")
+BACKUP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_DIR = os.path.join(BACKUP, "config")
 
 CHANNELS_EXCLUDE = {"feishu", "openclaw-weixin", "openclaw-lark"}

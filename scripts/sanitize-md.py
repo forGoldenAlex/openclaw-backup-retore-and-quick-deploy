@@ -16,7 +16,8 @@ import re
 import shutil
 
 WORKSPACE = os.path.expanduser("~/.openclaw/workspace")
-BACKUP = os.path.join(WORKSPACE, "openclaw-backup", "workspace")
+SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKUP = os.path.join(os.path.dirname(SCRIPTS_DIR), "workspace")
 
 HOSTNAME = os.uname().nodename
 HOME = os.path.expanduser("~")
