@@ -250,14 +250,19 @@ def main():
         json.dump(cleaned, f, indent=2, ensure_ascii=False)
     print(f"✓ 完整参考: {full_path} ({len(json.dumps(cleaned))} bytes)")
 
-    # 导出飞书 footer（feishu channel 已被排除出 delta，footer 单独保存）
+    # 导出飞书配置（feishu channel 已被排除出 delta，footer/streaming 单独保存）
     if "channels" in full and "feishu" in full["channels"]:
         feishu = full["channels"]["feishu"]
+        feishu_extra = {}
         if "footer" in feishu:
-            footer_path = os.path.join(CONFIG_DIR, "feishu-footer.json")
-            with open(footer_path, "w", encoding="utf-8") as f:
-                json.dump(feishu["footer"], f, indent=2, ensure_ascii=False)
-            print(f"✓ 飞书 footer: {footer_path}")
+            feishu_extra["footer"] = feishu["footer"]
+        if "streaming" in feishu:
+            feishu_extra["streaming"] = feishu["streaming"]
+        if feishu_extra:
+            path = os.path.join(CONFIG_DIR, "feishu-extra.json")
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(feishu_extra, f, indent=2, ensure_ascii=False)
+            print(f"✓ 飞书配置: {path}")
 
 
 if __name__ == "__main__":

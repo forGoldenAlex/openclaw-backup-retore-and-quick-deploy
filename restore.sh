@@ -451,17 +451,17 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "    npx -y @tencent-weixin/openclaw-weixin-cli@latest install"
     fi
 
-    # 恢复飞书 footer（可选）
-    FOOTER_FILE="$BACKUP/config/feishu-footer.json"
-    if [ -f "$FOOTER_FILE" ]; then
-        read -p "  是否恢复飞书 footer 配置? [Y/n] " -n 1 -r
+    # 恢复飞书配置（footer + streaming）
+    FEISHU_EXTRA="$BACKUP/config/feishu-extra.json"
+    if [ -f "$FEISHU_EXTRA" ]; then
+        read -p "  是否恢复飞书 footer + streaming 配置? [Y/n] " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-            jq --argjson footer "$(cat "$FOOTER_FILE")" \
-                '.channels.feishu.footer = $footer' \
+            jq --argjson extra "$(cat "$FEISHU_EXTRA")" \
+                '.channels.feishu += $extra' \
                 "$OPENCLAW_HOME/openclaw.json" > "${OPENCLAW_HOME}/openclaw.json.tmp"
             mv "${OPENCLAW_HOME}/openclaw.json.tmp" "$OPENCLAW_HOME/openclaw.json"
-            echo "  ✓ footer 已恢复"
+            echo "  ✓ 飞书配置已恢复"
         fi
     fi
 

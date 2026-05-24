@@ -95,7 +95,7 @@ openclaw-backup/
 ├── config/                           # ← backup.sh 生成
 │   ├── openclaw.json.delta           # 用户增量（用于 jq 合并）
 │   ├── openclaw.json.full            # 完整配置参考（人可读）
-│   └── feishu-footer.json            # 飞书消息 footer 配置
+│   └── feishu-extra.json             # 飞书配置（footer + streaming）
 │
 ├── credentials/                      # ← backup.sh 生成
 │   └── *.json                        # API Key 完整备份
