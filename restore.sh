@@ -26,6 +26,11 @@ log_step()  { echo -e "${BLUE}[STEP]${NC} $1"; }
 
 TOTAL_STEPS=14
 
+# 确保 npm 全局 bin 在 PATH 中（openclaw 已安装但 PATH 未加载时）
+if [ -d "$HOME/.npm-global/bin" ] && [[ ":$PATH:" != *":$HOME/.npm-global/bin:"* ]]; then
+    export PATH="$HOME/.npm-global/bin:$PATH"
+fi
+
 echo ""
 log_info "=========================================="
 log_info "OpenClaw 恢复 v7 — 14 步流程"
@@ -440,16 +445,25 @@ fi
 
 ### Step 10: Lark/WeChat ###
 log_step "10/${TOTAL_STEPS} 安装 Lark/WeChat（需 Gateway 在线）..."
-read -p "  是否安装第三方通讯插件? [y/N] " -n 1 -r
+
+# 微信
+read -p "  是否安装 openclaw-weixin（微信）? [y/N] " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    if [ -f "$BACKUP/plugins/install.sh" ]; then
-        bash "$BACKUP/plugins/install.sh"
-    else
-        echo "  手动安装命令:"
-        echo "    npx -y @larksuite/openclaw-lark install"
-        echo "    npx -y @tencent-weixin/openclaw-weixin-cli@latest install"
-    fi
+    npx -y @tencent-weixin/openclaw-weixin-cli@latest install
+    openclaw config set plugins.allow '["openclaw-weixin"]' --strict-json --merge 2>/dev/null || true
+    echo "  ✓ 微信插件已安装"
+else
+    echo "  跳过微信"
+fi
+
+# Lark
+read -p "  是否安装 openclaw-lark（飞书）? [y/N] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    npx -y @larksuite/openclaw-lark install
+    openclaw config set plugins.allow '["openclaw-lark"]' --strict-json --merge 2>/dev/null || true
+    echo "  ✓ 飞书插件已安装"
 
     # 恢复飞书配置（footer + streaming）
     FEISHU_EXTRA="$BACKUP/config/feishu-extra.json"
@@ -464,11 +478,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo "  ✓ 飞书配置已恢复"
         fi
     fi
-
-    # lark/weixin 安装完成后补回 plugins.allow
-    openclaw config set plugins.allow '["openclaw-weixin","openclaw-lark"]' --strict-json --merge 2>/dev/null || true
-else
-    echo "  跳过。稍后可运行: bash $BACKUP/plugins/install.sh"
 fi
 
 ### Phase 7: 容器 ###
@@ -532,7 +541,6 @@ echo ""
 echo "  重建 memory 索引 + 编译 wiki..."
 openclaw memory index --force 2>/dev/null || echo "  ⚠ 请手动运行: openclaw memory index --force"
 openclaw wiki compile 2>/dev/null || echo "  ⚠ 请手动运行: openclaw wiki compile"
-fi
 fi
 
 ### Step 14: 完整验证 ###
