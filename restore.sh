@@ -506,37 +506,33 @@ if command -v openclaw &>/dev/null; then
     fi
 fi
 
-### Step 13: 恢复 memory 数据 ###
+### Step 13: 恢复 memory 数据 + 重建索引 ###
 log_step "13/${TOTAL_STEPS} 恢复 memory 数据..."
-read -p "  是否恢复 memory 数据（SQLite + wiki）? [Y/n] " -n 1 -r
+read -p "  是否恢复 memory 数据（lcm.db + lcm-files）? [Y/n] " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Nn]$ ]]; then
     echo "  跳过"
 else
 MEMORY_BACKUP="$BACKUP/memory"
 
-# 13a. SQLite 数据库
-sqlite_count=0
-if [ -f "$MEMORY_BACKUP/main.sqlite" ]; then
-    mkdir -p "$OPENCLAW_HOME/memory"
-    cp "$MEMORY_BACKUP/main.sqlite" "$OPENCLAW_HOME/memory/"
-    sqlite_count=$((sqlite_count + 1))
-    echo "  ✓ main.sqlite 已恢复"
-fi
+# 13a. SQLite 数据库（仅 lcm.db — main.sqlite 由 memory index --force 重建）
 if [ -f "$MEMORY_BACKUP/lcm.db" ]; then
     cp "$MEMORY_BACKUP/lcm.db" "$OPENCLAW_HOME/"
-    sqlite_count=$((sqlite_count + 1))
     echo "  ✓ lcm.db 已恢复"
 fi
-echo "  → ${sqlite_count} 个 SQLite 数据库"
 
-# 13b. wiki 目录
-if [ -d "$MEMORY_BACKUP/wiki" ]; then
-    cp -r "$MEMORY_BACKUP/wiki" "$OPENCLAW_HOME/"
-    echo "  ✓ wiki/ 已恢复"
+# 13b. lcm-files 目录
+if [ -d "$MEMORY_BACKUP/lcm-files" ]; then
+    cp -r "$MEMORY_BACKUP/lcm-files" "$OPENCLAW_HOME/"
+    echo "  ✓ lcm-files/ 已恢复"
 fi
 
-# workspace/memory/*.md 已在 Step 8 由 sanitize-md.py 处理恢复
+# workspace/memory/*.md 已在 Step 8 恢复
+echo ""
+echo "  重建 memory 索引 + 编译 wiki..."
+openclaw memory index --force 2>/dev/null || echo "  ⚠ 请手动运行: openclaw memory index --force"
+openclaw wiki compile 2>/dev/null || echo "  ⚠ 请手动运行: openclaw wiki compile"
+fi
 fi
 
 ### Step 14: 完整验证 ###
@@ -618,8 +614,8 @@ echo "  [1] credentials:  $(ls "$OPENCLAW_HOME/credentials/"*.json 2>/dev/null |
 echo "  [2] openclaw.json: $(wc -l < "$OPENCLAW_HOME/openclaw.json" 2>/dev/null || echo '?') 行"
 echo "  [3] skills:       $(ls -d "$OPENCLAW_HOME/workspace/skills"/*/ 2>/dev/null | wc -l) 个"
 echo "  [4] workspace:    $(ls "$OPENCLAW_HOME/workspace/"*.md 2>/dev/null | wc -l) 个 MD 文件"
-echo "  [5] memory/sqlite: $(ls "$OPENCLAW_HOME/memory/main.sqlite" "$OPENCLAW_HOME/lcm.db" 2>/dev/null | wc -l) 个"
-echo "  [6] wiki:         $(test -d $OPENCLAW_HOME/wiki && echo '已恢复' || echo '未恢复')"
+echo "  [5] lcm:          $(ls "$OPENCLAW_HOME/lcm.db" "$OPENCLAW_HOME/lcm-files" 2>/dev/null | wc -l) 个"
+echo "  [6] 索引:         $(test -n "$(openclaw memory status 2>/dev/null)" && echo '已构建' || echo '请运行 memory index --force')"
 echo ""
 if [ -f "$OPENCLAW_HOME/openclaw.json.bk.pre-restore" ]; then
     echo "  原始配置备份: $OPENCLAW_HOME/openclaw.json.bk.pre-restore"
@@ -628,9 +624,6 @@ echo ""
 echo "  ⚠️  待手动完成："
 echo "  - 飞书 channel: 扫码认证"
 echo "  - 微信 channel: 扫码认证"
-echo ""
-echo "  如需重建记忆索引，运行:"
-echo "  openclaw wiki compile"
 echo ""
 echo "  ⚠️  重要：请先执行以下命令使 openclaw 命令生效："
 echo "  source ~/.bashrc"

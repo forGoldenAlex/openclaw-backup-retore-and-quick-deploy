@@ -109,10 +109,9 @@ openclaw-backup/
 │   ├── memory/*.md                   # 每日记忆（漂白后）
 │   └── scripts/                      # 漂白后的脚本
 │
-├── memory/                           # ← backup.sh Step 7
-│   ├── main.sqlite                   # 记忆数据库 (71M)
-│   ├── lcm.db                        # Lossless Context Memory (185M)
-│   └── wiki/                         # Memory Wiki 编译输出
+├── memory/                           # ← backup.sh 生成（main.sqlite 和 wiki 不备份，由索引重建）
+│   ├── lcm.db                        # Lossless Context Memory
+│   └── lcm-files/                    # LCM 文件缓存
 │
 ├── deps/                             # ← backup.sh 生成
 │   ├── pip-requirements.txt
@@ -166,7 +165,7 @@ chmod +x restore.sh
 | | 10 | Lark/WeChat | 需 Gateway 在线 |
 | **容器** | 11 | searxng | 可选启动容器 |
 | | 12 | 重启 Gateway | 加载所有配置 |
-| **Memory** | 13 | 恢复 memory 数据 | main.sqlite + lcm.db + wiki/ |
+| **Memory** | 13 | 恢复 memory + 重建索引 | lcm.db + lcm-files/ + `memory index --force` + `wiki compile` |
 | **验证** | 14 | 完整验证 | 命令 + Gateway + 插件 + 记忆搜索 + 测试 query |
 
 ---
@@ -364,8 +363,8 @@ jq -s '.[0] * .[1]' 新系统配置.json delta.json
 7. **delta 合并需 jq** — restore.sh Step 3a 自动安装
 8. **大陆镜像** — restore.sh 交互询问 npm/pip 镜像源
 9. **恢复出厂** — 已安装时询问是否 `openclaw reset --scope full`
-10. **Memory SQLite 不漂白** — 直接备份，恢复后路径可能需手动调整
-11. **记忆索引需重建** — 恢复后运行 `openclaw wiki compile`
+10. **main.sqlite 不备份** — 可从 memory/*.md 重建，恢复后自动运行 `memory index --force`
+11. **wiki 不备份** — 可从 memory/*.md 重建，恢复后自动运行 `wiki compile`
 12. **验证可选测试** — Step 14 可跳过记忆搜索和 query 测试
 
 ---

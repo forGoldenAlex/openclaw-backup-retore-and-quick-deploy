@@ -101,24 +101,19 @@ mkdir -p "$MEMORY_BACKUP"
 
 # 8a. workspace/memory/*.md 已在 Step 4 由 sanitize-md.py 处理
 
-# 8b. SQLite 数据库
+# 8b. SQLite 数据库（仅 lcm.db — main.sqlite 可从 memory/*.md 重建）
 sqlite_count=0
-if [ -f "$OPENCLAW_HOME/memory/main.sqlite" ]; then
-    cp "$OPENCLAW_HOME/memory/main.sqlite" "$MEMORY_BACKUP/"
-    sqlite_count=$((sqlite_count + 1))
-    echo "  ✓ main.sqlite (71M)"
-fi
 if [ -f "$OPENCLAW_HOME/lcm.db" ]; then
     cp "$OPENCLAW_HOME/lcm.db" "$MEMORY_BACKUP/"
     sqlite_count=$((sqlite_count + 1))
-    echo "  ✓ lcm.db (185M)"
+    echo "  ✓ lcm.db"
 fi
 echo "  → ${sqlite_count} 个 SQLite 数据库"
 
-# 8c. wiki 目录
-if [ -d "$OPENCLAW_HOME/wiki" ]; then
-    cp -r "$OPENCLAW_HOME/wiki" "$MEMORY_BACKUP/"
-    echo "  ✓ wiki/ 目录"
+# 8c. lcm-files 目录（Lossless Context Memory 文件缓存）
+if [ -d "$OPENCLAW_HOME/lcm-files" ]; then
+    cp -r "$OPENCLAW_HOME/lcm-files" "$MEMORY_BACKUP/"
+    echo "  ✓ lcm-files/ ($(du -sh "$OPENCLAW_HOME/lcm-files" | cut -f1))"
 fi
 
 ### 9. 打包 + 校验 ###
