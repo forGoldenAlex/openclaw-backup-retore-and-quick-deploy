@@ -98,6 +98,7 @@ fi
 log_info "[8/9] 备份 memory 系统..."
 MEMORY_BACKUP="$BACKUP/memory"
 mkdir -p "$MEMORY_BACKUP"
+rm -rf "$MEMORY_BACKUP"/* 2>/dev/null || true
 
 # 8a. workspace/memory/*.md 已在 Step 4 由 sanitize-md.py 处理
 
