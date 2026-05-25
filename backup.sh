@@ -82,16 +82,22 @@ else
 fi
 # podman-run.sh 已在版本控制中
 
-### 7. 导出 searxng 镜像 ###
+### 7. 导出 searxng 镜像（可选）###
 log_info "[7/9] 导出 searxng 镜像..."
 CONTAINER_BACKUP="$BACKUP/containers/searxng"
 mkdir -p "$CONTAINER_BACKUP"
-if podman image exists docker.io/searxng/searxng:latest 2>/dev/null; then
-    rm -f "$CONTAINER_BACKUP/searxng.tar"
-    podman save -o "$CONTAINER_BACKUP/searxng.tar" docker.io/searxng/searxng:latest
-    echo "  ✓ searxng 镜像已导出"
+read -p "  是否备份 searxng 镜像？(约 80M) [y/N] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if podman image exists docker.io/searxng/searxng:latest 2>/dev/null; then
+        rm -f "$CONTAINER_BACKUP/searxng.tar"
+        podman save -o "$CONTAINER_BACKUP/searxng.tar" docker.io/searxng/searxng:latest
+        echo "  ✓ searxng 镜像已导出"
+    else
+        echo "  ⚠ searxng 镜像不存在，跳过"
+    fi
 else
-    echo "  ⚠ searxng 镜像不存在，跳过"
+    echo "  跳过 searxng 镜像备份"
 fi
 
 ### 8. 备份 memory 系统 ###
