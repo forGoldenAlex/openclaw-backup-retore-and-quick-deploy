@@ -403,9 +403,7 @@ if command -v openclaw &>/dev/null; then
     fi
 
     # 启用 memory-wiki（默认禁用）
-    if ! openclaw plugins list 2>/dev/null | grep -q "memory-wiki"; then
-        openclaw plugins enable memory-wiki 2>/dev/null || true
-    fi
+    openclaw plugins enable memory-wiki
 
     echo "  安装 Gateway systemd 服务..."
     openclaw gateway install
