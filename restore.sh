@@ -466,7 +466,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # 恢复飞书配置（footer + streaming）
     FEISHU_EXTRA="$BACKUP/config/feishu-extra.json"
     if [ -f "$FEISHU_EXTRA" ]; then
-        read -p "  是否恢复飞书 footer + streaming 配置? [Y/n] " -n 1 -r
+        read -p "  是否恢复飞书配置（dmPolicy/allowFrom/footer/streaming 等）? [Y/n] " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Nn]$ ]]; then
             jq --argjson extra "$(cat "$FEISHU_EXTRA")" \

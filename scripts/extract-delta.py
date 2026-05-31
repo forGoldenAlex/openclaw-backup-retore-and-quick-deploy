@@ -250,14 +250,28 @@ def main():
         json.dump(cleaned, f, indent=2, ensure_ascii=False)
     print(f"✓ 完整参考: {full_path} ({len(json.dumps(cleaned))} bytes)")
 
-    # 导出飞书配置（feishu channel 已被排除出 delta，footer/streaming 单独保存）
+    # 导出飞书配置（feishu channel 已被排除出 delta，完整配置单独保存）
     if "channels" in full and "feishu" in full["channels"]:
         feishu = full["channels"]["feishu"]
         feishu_extra = {}
-        if "footer" in feishu:
-            feishu_extra["footer"] = feishu["footer"]
-        if "streaming" in feishu:
-            feishu_extra["streaming"] = feishu["streaming"]
+        # 通道级配置
+        for key in ["dmPolicy", "groupPolicy", "reactionNotifications",
+                     "typingIndicator", "resolveSenderNames", "streaming", "footer"]:
+            if key in feishu:
+                feishu_extra[key] = feishu[key]
+        # allowFrom 清空（恢复后需重新配对）
+        feishu_extra["allowFrom"] = []
+        feishu_extra["groupAllowFrom"] = []
+        # accounts.lark 配置
+        if "accounts" in feishu and "lark" in feishu["accounts"]:
+            lark = feishu["accounts"]["lark"]
+            lark_extra = {}
+            for key in ["dmPolicy", "groupPolicy"]:
+                if key in lark:
+                    lark_extra[key] = lark[key]
+            lark_extra["allowFrom"] = []
+            lark_extra["groupAllowFrom"] = []
+            feishu_extra["accounts"] = {"lark": lark_extra}
         if feishu_extra:
             path = os.path.join(CONFIG_DIR, "feishu-extra.json")
             with open(path, "w", encoding="utf-8") as f:
